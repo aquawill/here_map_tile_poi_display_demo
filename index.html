@@ -31,9 +31,20 @@
 <body>
     <div class="folium-map" id="map"></div>
     <div style=" position: absolute; top: 14px; z-index: 1000; left: 60px; ">
-        <input id="poi_cat_mask" type="text" style="font-size: 16px;" placeholder="Input POI Mask (pois=)" maxlength="100" size="40"> </div>
-    <div style=" position: absolute; top: 48px; z-index: 1000; left: 60px; ">
-        <input id="lg" type="text" style="font-size: 16px;" placeholder="Language (lg=)" maxlength="100" size="40"> </div>
+        <input id="base_url" type="text" style="font-size: 16px;" placeholder="Base Url (default: base.maps.api.here.com)" maxlength="100" size="40"> </div>
+    <div style=" position: absolute; top: 44px; z-index: 1000; left: 60px; ">
+        <input id="tiletypes" type="text" style="font-size: 16px;" placeholder="Type Tyle (default: maptile)" maxlength="100" size="40"> </div>
+    <div style=" position: absolute; top: 74; z-index: 1000; left: 60px; ">
+        <input id="scheme" type="text" style="font-size: 16px;" placeholder="Tile Scheme (default: normal.day)" maxlength="100" size="40"> </div>
+    <div style=" position: absolute; top: 104px; z-index: 1000; left: 60px; ">
+        <input id="poi_cat_mask" type="text" style="font-size: 16px;" placeholder="pois (default: blank)" maxlength="100" size="40"> </div>
+    <div style=" position: absolute; top: 134px; z-index: 1000; left: 60px; ">
+        <input id="lg" type="text" style="font-size: 16px;" placeholder="lg (default: eng)" maxlength="100" size="40"> </div>
+    <div style=" position: absolute; top: 164px; z-index: 1000; left: 60px; ">
+        <input id="style" type="text" style="font-size: 16px;" placeholder="style (default: default)" maxlength="100" size="40"> </div>
+    <div style=" position: absolute; top: 194px; z-index: 1000; left: 60px; ">
+        <input id="ppi" type="text" style="font-size: 16px;" placeholder="ppi (default: 72)" maxlength="100" size="40"> </div>
+    <div id="full_url" style=" position: absolute; top: 96%; z-index: 1000; left: 60px; "></div>
 </body>
 <script>
     //Taipei
@@ -59,9 +70,48 @@
         });
         var he_appid = 'NXqTq9BXXeEiR4yuXfjj';
         var he_appcode = '3NpseRCnS25FaujWRdthVQ';
-        document.getElementById('poi_cat_mask').addEventListener('keypress', onSearch)
-        document.getElementById('lg').addEventListener('keypress', onSearch)
-        var tile_base_url = 'https://{s}.base.maps.api.here.com/maptile/2.1/maptile/newest/normal.day/{z}/{x}/{y}/256/png8?ppi=250&lg=&app_id=' + he_appid + '&app_code=' + he_appcode;
+
+        function compose_url() {
+            var base_url = document.getElementById('base_url').value;
+            if (!base_url) {
+                base_url = 'base.maps.cit.api.here.com';
+            }
+            var tiletypes = document.getElementById('tiletypes').value;
+            if (!tiletypes) {
+                tiletypes = 'maptile';
+            }
+            var scheme = document.getElementById('scheme').value;
+            if (!scheme) {
+                scheme = 'normal.day';
+            }
+            var style = document.getElementById('style').value;
+            if (!style) {
+                style = 'default';
+            }
+            var ppi = document.getElementById('ppi').value;
+            if (!ppi) {
+                ppi = '72';
+            }
+            var pois = document.getElementById('poi_cat_mask').value;
+            if (!pois) {
+                pois = '';
+            }
+            var lg = document.getElementById('lg').value;
+            if (!lg) {
+                lg = 'eng';
+            }
+            var tile_base_url = 'https://{s}.' + base_url + '/maptile/2.1/' + tiletypes + '/newest/' + scheme + '/{z}/{x}/{y}/256/png8?ppi=' + ppi + '&app_id=' + he_appid + '&app_code=' + he_appcode + '&style=' + style + '&pois=' + pois + '&lg=' + lg;
+            document.getElementById('full_url').innerHTML = '<mark>' + 'https://{s}.' + base_url + '/maptile/2.1/' + tiletypes + '/newest/' + scheme + '/{z}/{x}/{y}/256/png8?ppi=' + ppi + '&app_id={APP_ID}&app_code={APP_CODE}&style=' + style + '&lg=' + lg + '&pois=' + pois + '</mark>';
+            return tile_base_url
+        }
+        document.getElementById('base_url').addEventListener('keypress', onSearch);
+        document.getElementById('tiletypes').addEventListener('keypress', onSearch);
+        document.getElementById('scheme').addEventListener('keypress', onSearch);
+        document.getElementById('style').addEventListener('keypress', onSearch);
+        document.getElementById('ppi').addEventListener('keypress', onSearch);
+        document.getElementById('lg').addEventListener('keypress', onSearch);
+        document.getElementById('poi_cat_mask').addEventListener('keypress', onSearch);
+        var tile_base_url = compose_url();
         var layer = L.tileLayer(tile_base_url, {
             "attribution": "HERE"
             , "detectRetina": true
@@ -84,7 +134,8 @@
                 map.removeLayer(layer);
                 var lg = document.getElementById('lg').value;
                 var poi_mask_value = document.getElementById('poi_cat_mask').value;
-                layer.setUrl(tile_base_url + '&pois=' + poi_mask_value + '&lg=' + lg);
+                var tile_base_url = compose_url();
+                layer.setUrl(tile_base_url);
                 map.addLayer(layer);
             }
         }
