@@ -45,102 +45,188 @@
     <div style=" position: absolute; top: 194px; z-index: 1000; left: 60px; ">
         <input id="ppi" type="text" style="font-size: 16px;" placeholder="ppi (default: 72)" maxlength="100" size="40"> </div>
     <div id="full_url" style=" position: absolute; top: 96%; z-index: 1000; left: 60px; "></div>
+    <div id="meta_switch" style=" position: absolute; top: 20px; z-index: 1000; right: 20px; ">
+        <button type="button" onclick="toggle_meta_label()">Toggle Meta Label</button>
+    </div>
 </body>
 <script>
     //Taipei
     var default_lat = 25.03678;
     var default_lon = 121.56851;
-    mapper(default_lat, default_lon, 0);
+    var tile_size = 256;
+    var map = L.map('map', {
+        center: [default_lat, default_lon]
+        , zoom: 15
+        , maxZoom: 20
+        , minZoom: 4
+        , layers: []
+        , worldCopyJump: false
+        , crs: L.CRS.EPSG3857
+        , keyboard: true
+    });
+    var he_appid = 'NXqTq9BXXeEiR4yuXfjj';
+    var he_appcode = '3NpseRCnS25FaujWRdthVQ';
 
-    function mapper(lat, lon, radius) {
-        var dt = new Date();
-        var epoch = new Date().getTime();
-        var sec = dt.getMilliseconds()
-        var bounds = null;
-        var map = L.map('map', {
-            center: [default_lat, default_lon]
-            , zoom: 16
-            , maxZoom: 20
-            , minZoom: 4
-            , maxBounds: bounds
-            , layers: []
-            , worldCopyJump: false
-            , crs: L.CRS.EPSG3857
-            , keyboard: true
+    function getURL(URL) {
+        return new Promise(function (resolve, reject) {
+            var req = new XMLHttpRequest();
+            req.open('GET', URL, true);
+            req.onload = function () {
+                if (req.status === 200) {
+                    resolve(req.responseText);
+                }
+                else {
+                    reject(new Error(req.statusText));
+                }
+            };
+            req.onerror = function () {
+                reject(new Error(req.statusText));
+            };
+            req.send();
         });
-        var he_appid = 'NXqTq9BXXeEiR4yuXfjj';
-        var he_appcode = '3NpseRCnS25FaujWRdthVQ';
+    }
+    var meta_group = L.featureGroup();
 
-        function compose_url() {
-            var base_url = document.getElementById('base_url').value;
-            if (!base_url) {
-                base_url = 'base.maps.cit.api.here.com';
+    function call_meta(meta_base_url, x, y, z) {
+        console.log(meta_base_url, x, y, z);
+        var meta_markers = [];
+
+        function tile_to_lon(x, z) {
+            return (x / Math.pow(2, z) * 360 - 180)
+        }
+
+        function tile_to_lat(y, z) {
+            var n = Math.PI - 2 * Math.PI * y / Math.pow(2, z)
+            return (180 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n))))
+        }
+        var tile_lat = tile_to_lat(y, z);
+        var tile_lon = tile_to_lon(x, z);
+        var px_lat = Math.abs((tile_to_lat(y, z) - tile_to_lat(y + 1, z)) / tile_size);
+        var px_lon = Math.abs((tile_to_lon(y, z) - tile_to_lon(y + 1, z)) / tile_size);
+        getURL(meta_base_url).then(function onFulfilled(result) {
+            var r = JSON.parse(result)
+                , metadata = r.metadata
+                , city_center_labels = metadata['city center labels']
+                , labels = metadata['labels']
+                , street_labels = metadata['street labels'];
+            for (m = 0; m < labels.length; m++) {
+                var label = labels[m]
+                    , name = label['name']
+                    , type = label['type']
+                    , bounding_boxes = label['bounding boxes'];
+                for (p = 0; p < bounding_boxes.length; p++) {
+                    var bbox = bounding_boxes[p]
+                        , left = Math.floor(bbox['left'])
+                        , top = Math.floor(bbox['top'])
+                        , width = Math.floor(bbox['width'])
+                        , height = Math.floor(bbox['height'])
+                        , left_lon = tile_to_lon(x, z) + left * px_lon
+                        , top_lat = tile_to_lat(y, z) + top * px_lat
+                        , center_lon = tile_to_lon(x, z) + (left + width / 2) * px_lon
+                        , center_lat = tile_to_lat(y, z) - (top + height / 2) * px_lat;
+                    var label_marker = L.marker([center_lat, center_lon]);
+                    label_marker.bindPopup(name + '<br>' + type);
+                    meta_markers.push(label_marker);
+                }
             }
-            var tiletypes = document.getElementById('tiletypes').value;
-            if (!tiletypes) {
-                tiletypes = 'maptile';
+        }).then(function () {
+            for (o = 0; o < meta_markers.length; o++) {
+                meta_markers[o].addTo(meta_group);
             }
-            var scheme = document.getElementById('scheme').value;
-            if (!scheme) {
-                scheme = 'normal.day';
-            }
-            var style = document.getElementById('style').value;
-            if (!style) {
-                style = 'default';
-            }
-            var ppi = document.getElementById('ppi').value;
-            if (!ppi) {
-                ppi = '72';
-            }
-            var pois = document.getElementById('poi_cat_mask').value;
-            if (!pois) {
-                pois = '';
-            }
+        })
+    }
+
+    function onSearch(e) {
+        var keyCode = null;
+        if (e.which) {
+            keyCode = e.which;
+        }
+        else if (e.keyCode) {
+            keyCode = e.keyCode;
+        }
+        if (keyCode == 13) {
+            meta_group.clearLayers();
+            map.removeLayer(image_layer);
             var lg = document.getElementById('lg').value;
-            if (!lg) {
-                lg = 'eng';
-            }
-            var tile_base_url = 'https://{s}.' + base_url + '/maptile/2.1/' + tiletypes + '/newest/' + scheme + '/{z}/{x}/{y}/256/png8?ppi=' + ppi + '&app_id=' + he_appid + '&app_code=' + he_appcode + '&style=' + style + '&pois=' + pois + '&lg=' + lg;
-            document.getElementById('full_url').innerHTML = '<mark>' + 'https://{s}.' + base_url + '/maptile/2.1/' + tiletypes + '/newest/' + scheme + '/{z}/{x}/{y}/256/png8?ppi=' + ppi + '&app_id={APP_ID}&app_code={APP_CODE}&style=' + style + '&lg=' + lg + '&pois=' + pois + '</mark>';
-            return tile_base_url
+            var poi_mask_value = document.getElementById('poi_cat_mask').value;
+            var tile_base_url = compose_url();
+            image_layer.setUrl(tile_base_url);
+            map.addLayer(image_layer);
         }
-        document.getElementById('base_url').addEventListener('keypress', onSearch);
-        document.getElementById('tiletypes').addEventListener('keypress', onSearch);
-        document.getElementById('scheme').addEventListener('keypress', onSearch);
-        document.getElementById('style').addEventListener('keypress', onSearch);
-        document.getElementById('ppi').addEventListener('keypress', onSearch);
-        document.getElementById('lg').addEventListener('keypress', onSearch);
-        document.getElementById('poi_cat_mask').addEventListener('keypress', onSearch);
-        var tile_base_url = compose_url();
-        var layer = L.tileLayer(tile_base_url, {
-            "attribution": "HERE"
-            , "detectRetina": true
-            , "maxZoom": 20
-            , "minZoom": 1
-            , "noWrap": false
-            , "subdomains": ['1', '2', '3', '4']
-        }).addTo(map);
-        map.addLayer(layer);
+    }
 
-        function onSearch(e) {
-            var keyCode = null;
-            if (e.which) {
-                keyCode = e.which;
-            }
-            else if (e.keyCode) {
-                keyCode = e.keyCode;
-            }
-            if (keyCode == 13) {
-                map.removeLayer(layer);
-                var lg = document.getElementById('lg').value;
-                var poi_mask_value = document.getElementById('poi_cat_mask').value;
-                var tile_base_url = compose_url();
-                layer.setUrl(tile_base_url);
-                map.addLayer(layer);
-            }
+    function compose_url() {
+        var base_url = document.getElementById('base_url').value;
+        if (!base_url) {
+            base_url = 'base.maps.cit.api.here.com';
         }
-        L.control.scale({
-            position: 'bottomright'
-        }).addTo(map);
-    };
+        var tiletypes = document.getElementById('tiletypes').value;
+        if (!tiletypes) {
+            tiletypes = 'maptile';
+        }
+        var scheme = document.getElementById('scheme').value;
+        if (!scheme) {
+            scheme = 'normal.day';
+        }
+        var style = document.getElementById('style').value;
+        if (!style) {
+            style = 'default';
+        }
+        var ppi = document.getElementById('ppi').value;
+        if (!ppi) {
+            ppi = '72';
+        }
+        var pois = document.getElementById('poi_cat_mask').value;
+        if (!pois) {
+            pois = '';
+        }
+        var lg = document.getElementById('lg').value;
+        if (!lg) {
+            lg = 'eng';
+        }
+        var tile_base_url = 'https://{s}.' + base_url + '/maptile/2.1/' + tiletypes + '/newest/' + scheme + '/{z}/{x}/{y}/256/png8?ppi=' + ppi + '&app_id=' + he_appid + '&app_code=' + he_appcode + '&style=' + style + '&pois=' + pois + '&lg=' + lg;
+        document.getElementById('full_url').innerHTML = '<mark>' + 'https://{s}.' + base_url + '/maptile/2.1/' + tiletypes + '/newest/' + scheme + '/{z}/{x}/{y}/256/png8?ppi=' + ppi + '&app_id={APP_ID}&app_code={APP_CODE}&style=' + style + '&lg=' + lg + '&pois=' + pois + '</mark>';
+        return tile_base_url
+    }
+    document.getElementById('base_url').addEventListener('keypress', onSearch);
+    document.getElementById('tiletypes').addEventListener('keypress', onSearch);
+    document.getElementById('scheme').addEventListener('keypress', onSearch);
+    document.getElementById('style').addEventListener('keypress', onSearch);
+    document.getElementById('ppi').addEventListener('keypress', onSearch);
+    document.getElementById('lg').addEventListener('keypress', onSearch);
+    document.getElementById('poi_cat_mask').addEventListener('keypress', onSearch);
+    var tile_base_url = compose_url();
+    var image_layer = L.tileLayer(tile_base_url, {
+        "attribution": "HERE"
+        , "detectRetina": true
+        , "maxZoom": 20
+        , "minZoom": 1
+        , "noWrap": false
+        , "subdomains": ['1', '2', '3', '4']
+    }).addTo(map);
+    map.on('zoomstart', function (e) {
+        meta_group.clearLayers();
+    })
+    image_layer.on('tileload', function (e) {
+        var coords = e.coords
+            , x = coords.x
+            , y = coords.y
+            , z = coords.z
+            , url = e
+            , meta_url = e.tile.src + '&metadata=metaonly';
+        call_meta(meta_url, x, y, z);
+    })
+    map.addLayer(image_layer);
+
+    function toggle_meta_label() {
+        if (!map.hasLayer(meta_group)) {
+            map.addLayer(meta_group);
+        }
+        else {
+            map.removeLayer(meta_group);
+        }
+    }
+    L.control.scale({
+        position: 'bottomright'
+    }).addTo(map);
 </script>
