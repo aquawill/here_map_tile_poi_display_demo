@@ -174,7 +174,7 @@
                 }
                 var street_label_polyline = L.polyline(polyline_latlngs, {
                     color: '#ffbb55'
-                    , weight: 10
+                    , weight: street_label_font_size
                     , opacity: 0.3
                 }).bindPopup('name: ' + street_label_name);
                 meta_markers.push(street_label_polyline);
