@@ -88,7 +88,7 @@
     var meta_group = L.featureGroup();
 
     function call_meta(meta_base_url, x, y, z) {
-        console.log(meta_base_url, x, y, z);
+        //console.log(meta_base_url);
         var meta_markers = [];
 
         function tile_to_lon(x, z) {
@@ -121,13 +121,63 @@
                         , width = Math.floor(bbox['width'])
                         , height = Math.floor(bbox['height'])
                         , left_lon = tile_to_lon(x, z) + left * px_lon
-                        , top_lat = tile_to_lat(y, z) + top * px_lat
+                        , top_lat = tile_to_lat(y, z) - top * px_lat
                         , center_lon = tile_to_lon(x, z) + (left + width / 2) * px_lon
-                        , center_lat = tile_to_lat(y, z) - (top + height / 2) * px_lat;
-                    var label_marker = L.marker([center_lat, center_lon]);
-                    label_marker.bindPopup(name + '<br>' + type);
-                    meta_markers.push(label_marker);
+                        , center_lat = tile_to_lat(y, z) - (top + height / 2) * px_lat
+                        , right_lon = tile_to_lon(x, z) + (left + width) * px_lon
+                        , buttom_lat = tile_to_lat(y, z) - (top + height) * px_lat;
+                    var bounds = [[top_lat, left_lon], [buttom_lat, right_lon]];
+                    var meta_rec = L.rectangle(bounds, {
+                        color: "#ffbb55"
+                        , weight: 1
+                    });
+                    meta_rec.bindPopup('name: ' + name + '<br>type: ' + type);
+                    meta_markers.push(meta_rec);
                 }
+            }
+            for (n = 0; n < city_center_labels.length; n++) {
+                var city_center_label = city_center_labels[n]
+                    , name = city_center_label['name']
+                    , text_box = city_center_label['text box']
+                    , info = city_center_label['city center info'];
+                var left = Math.floor(text_box['left'])
+                    , top = Math.floor(text_box['top'])
+                    , width = Math.floor(text_box['width'])
+                    , height = Math.floor(text_box['height'])
+                    , left_lon = tile_to_lon(x, z) + left * px_lon
+                    , top_lat = tile_to_lat(y, z) - top * px_lat
+                    , center_lon = tile_to_lon(x, z) + (left + width / 2) * px_lon
+                    , center_lat = tile_to_lat(y, z) - (top + height / 2) * px_lat
+                    , right_lon = tile_to_lon(x, z) + (left + width) * px_lon
+                    , buttom_lat = tile_to_lat(y, z) - (top + height) * px_lat;
+                var bounds = [[top_lat, left_lon], [buttom_lat, right_lon]];
+                var meta_rec = L.rectangle(bounds, {
+                    color: "#ffbb55"
+                    , weight: 1
+                });
+                meta_rec.bindPopup('name: ' + name + '<br>info: ' + JSON.stringify(info));
+                meta_markers.push(meta_rec);
+            }
+            for (q = 0; q < street_labels.length; q++) {
+                var street_label = street_labels[q]
+                    , street_label_name = street_label['name']
+                    , street_label_font_size = street_label['font size']
+                    , street_label_vertices = street_label['vertices'];
+                var polyline_latlngs = [];
+                for (r = 0; r < street_label_vertices.length; r++) {
+                    var vertice = street_label_vertices[r]
+                        , vertice_x = vertice['x']
+                        , vertice_y = vertice['y']
+                        , x_lon = tile_to_lon(x, z) + vertice_x * px_lon
+                        , y_lat = tile_to_lat(y, z) - vertice_y * px_lat;
+                    polyline_latlngs.push([y_lat, x_lon]);
+                }
+                var street_label_polyline = L.polyline(polyline_latlngs, {
+                    color: '#ffbb55'
+                    , weight: 10
+                    , opacity: 0.3
+                }).bindPopup('name: ' + street_label_name);
+                meta_markers.push(street_label_polyline);
             }
         }).then(function () {
             for (o = 0; o < meta_markers.length; o++) {
