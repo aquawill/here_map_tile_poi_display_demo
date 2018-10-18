@@ -131,7 +131,7 @@
                         color: "#ffbb55"
                         , weight: 1
                     });
-                    meta_rec.bindPopup('name: ' + name + '<br>type: ' + type);
+                    meta_rec.bindPopup('label<br>name: ' + name + '<br>type: ' + type);
                     meta_markers.push(meta_rec);
                 }
             }
@@ -155,7 +155,7 @@
                     color: "#ffbb55"
                     , weight: 1
                 });
-                meta_rec.bindPopup('name: ' + name + '<br>info: ' + JSON.stringify(info));
+                meta_rec.bindPopup('city center label<br>name: ' + name + '<br>info: ' + JSON.stringify(info));
                 meta_markers.push(meta_rec);
             }
             for (q = 0; q < street_labels.length; q++) {
@@ -176,7 +176,7 @@
                     color: '#ffbb55'
                     , weight: street_label_font_size
                     , opacity: 0.3
-                }).bindPopup('name: ' + street_label_name);
+                }).bindPopup('street label<br>name: ' + street_label_name);
                 meta_markers.push(street_label_polyline);
             }
         }).then(function () {
