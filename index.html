@@ -5,8 +5,16 @@
         L_NO_TOUCH = false;
         L_DISABLE_3D = false;
     </script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css" integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ==" crossorigin="" />
-    <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js" integrity="sha512-/Nsx9X4HebavoBvEBuyp3I7od5tA0UzAxs+j83KgC8PU0kgB4XiK4Lfe4y4cgBtaRJQEIFCW+oC506aPT2L1zw==" crossorigin=""></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css"
+        integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
+        crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"
+        integrity="sha512-/Nsx9X4HebavoBvEBuyp3I7od5tA0UzAxs+j83KgC8PU0kgB4XiK4Lfe4y4cgBtaRJQEIFCW+oC506aPT2L1zw=="
+        crossorigin=""></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="./scripts/leaflet-hash.js"></script>
+    <link href="./styles/multi-select.css" media="screen" rel="stylesheet" type="text/css">
     <meta charset=utf-8 />
     <style>
         html,
@@ -31,41 +39,458 @@
 <body>
     <div class="folium-map" id="map"></div>
     <div style=" position: absolute; top: 14px; z-index: 1000; left: 60px; ">
-        <input id="base_url" type="text" style="font-size: 16px;" placeholder="Base Url (default: base.maps.api.here.com)" maxlength="100" size="40"> </div>
+        <input id="base_url" type="text" style="font-size: 16px;"
+            placeholder="Base Url (default: base.maps.ls.hereapi.com)" maxlength="100" size="40"> </div>
     <div style=" position: absolute; top: 44px; z-index: 1000; left: 60px; ">
-        <input id="tiletypes" type="text" style="font-size: 16px;" placeholder="Type Tyle (default: maptile)" maxlength="100" size="40"> </div>
+        <input id="tiletypes" type="text" style="font-size: 16px;" placeholder="Type Tyle (default: maptile)"
+            maxlength="100" size="40"> </div>
     <div style=" position: absolute; top: 74; z-index: 1000; left: 60px; ">
-        <input id="scheme" type="text" style="font-size: 16px;" placeholder="Tile Scheme (default: normal.day)" maxlength="100" size="40"> </div>
+        <input id="scheme" type="text" style="font-size: 16px;" placeholder="Tile Scheme (default: normal.day)"
+            maxlength="100" size="40"> </div>
+
     <div style=" position: absolute; top: 104px; z-index: 1000; left: 60px; ">
-        <input id="poi_cat_mask" type="text" style="font-size: 16px;" placeholder="pois (default: blank)" maxlength="100" size="40"> </div>
+        <input id="lg" type="text" style="font-size: 16px;" placeholder="lg (default: eng)" maxlength="100" size="40">
+    </div>
     <div style=" position: absolute; top: 134px; z-index: 1000; left: 60px; ">
-        <input id="lg" type="text" style="font-size: 16px;" placeholder="lg (default: eng)" maxlength="100" size="40"> </div>
+        <input id="style" type="text" style="font-size: 16px;" placeholder="style (default: default)" maxlength="100"
+            size="40"> </div>
     <div style=" position: absolute; top: 164px; z-index: 1000; left: 60px; ">
-        <input id="style" type="text" style="font-size: 16px;" placeholder="style (default: default)" maxlength="100" size="40"> </div>
-    <div style=" position: absolute; top: 194px; z-index: 1000; left: 60px; ">
-        <input id="ppi" type="text" style="font-size: 16px;" placeholder="ppi (default: 72)" maxlength="100" size="40"> </div>
+        <input id="ppi" type="text" style="font-size: 16px;" placeholder="ppi (default: 72)" maxlength="100" size="40">
+    </div>
     <div id="full_url" style=" position: absolute; top: 96%; z-index: 1000; left: 60px; "></div>
     <div id="meta_switch" style=" position: absolute; top: 20px; z-index: 1000; right: 20px; ">
         <button type="button" onclick="toggle_meta_label()">Toggle Meta Label</button>
     </div>
+    <div id="cat_selection" style=" position: absolute; top: 60px; z-index: 1000; right: 40px; ">
+        <select id='poi_select' multiple="multiple">
+            <option value='1'>Restaurant</option>
+            <option value='2'>Casual Dining</option>
+            <option value='3'>Fine Dining</option>
+            <option value='4'>Take Out and Delivery Only</option>
+            <option value='5'>Food Market-Stall</option>
+            <option value='6'>Taqueria</option>
+            <option value='7'>Deli</option>
+            <option value='8'>Cafeteria</option>
+            <option value='9'>Bistro</option>
+            <option value='10'>Fast Food</option>
+            <option value='11'>Hawker Centre</option>
+            <option value='12'>Coffee-Tea</option>
+            <option value='13'>Coffee Shop</option>
+            <option value='14'>Tea House</option>
+            <option value='15'>Nightlife-Entertainment</option>
+            <option value='16'>Bar-Pub-Stube-Biergarten</option>
+            <option value='17'>Night Club</option>
+            <option value='18'>Dancing</option>
+            <option value='19'>Karaoke</option>
+            <option value='20'>Live Entertainment-Music</option>
+            <option value='21'>Billiards-Pool Hall</option>
+            <option value='22'>Video Arcade-Game Room</option>
+            <option value='23'>Jazz Club</option>
+            <option value='24'>Adult Entertainment</option>
+            <option value='25'>Cocktail Lounge</option>
+            <option value='26'>Cinema</option>
+            <option value='27'>Theatre, Music and Culture</option>
+            <option value='28'>Performing Arts</option>
+            <option value='29'>Gambling-Lottery-Betting</option>
+            <option value='30'>Casino</option>
+            <option value='31'>Lottery Booth</option>
+            <option value='32'>Landmark-Attraction</option>
+            <option value='33'>Tourist Attraction</option>
+            <option value='34'>Gallery</option>
+            <option value='35'>Historical Monument</option>
+            <option value='36'>Winery</option>
+            <option value='37'>Flyover</option>
+            <option value='38'>Named Intersection-Chowk</option>
+            <option value='39'>Brewery</option>
+            <option value='40'>Distillery</option>
+            <option value='41'>Museum</option>
+            <option value='42'>Science Museum</option>
+            <option value='43'>Children's Museum</option>
+            <option value='44'>History Museum</option>
+            <option value='45'>Art Museum</option>
+            <option value='46'>Religious Place</option>
+            <option value='47'>Church</option>
+            <option value='48'>Temple</option>
+            <option value='49'>Synagogue</option>
+            <option value='50'>Ashram</option>
+            <option value='51'>Mosque</option>
+            <option value='52'>Other Place of Worship</option>
+            <option value='53'>Body of water</option>
+            <option value='54'>Reservoir</option>
+            <option value='55'>Waterfall</option>
+            <option value='56'>Bay-Harbor</option>
+            <option value='57'>River</option>
+            <option value='58'>Canal</option>
+            <option value='59'>Lake</option>
+            <option value='60'>Mountain or Hill</option>
+            <option value='61'>Mountain Passes</option>
+            <option value='62'>Mountain Peaks</option>
+            <option value='63'>Undersea Feature</option>
+            <option value='64'>Forest, Heath or Other Vegetation</option>
+            <option value='65'>Natural and Geographical</option>
+            <option value='66'>Public Sports Airport</option>
+            <option value='67'>Airport</option>
+            <option value='68'>Airport Terminal</option>
+            <option value='69'>Train Station</option>
+            <option value='70'>Bus Station</option>
+            <option value='71'>Underground Train-Subway</option>
+            <option value='72'>Commuter Rail Station</option>
+            <option value='73'>Commuter Train</option>
+            <option value='74'>Public Transit Access</option>
+            <option value='75'>Transportation Service</option>
+            <option value='76'>Public Transit Stop</option>
+            <option value='77'>Local Transit</option>
+            <option value='78'>Ferry Terminal</option>
+            <option value='79'>Boat Ferry</option>
+            <option value='80'>Rail Ferry</option>
+            <option value='81'>Taxi Stand</option>
+            <option value='82'>Highway Exit</option>
+            <option value='83'>Tollbooth</option>
+            <option value='84'>Bicycle Sharing Location</option>
+            <option value='85'>Bicycle Parking</option>
+            <option value='86'>Weigh Station</option>
+            <option value='87'>Cargo Center</option>
+            <option value='88'>Rail Yard</option>
+            <option value='89'>Seaport-Harbour</option>
+            <option value='90'>Airport Cargo</option>
+            <option value='91'>Couriers</option>
+            <option value='92'>Cargo Transportation</option>
+            <option value='93'>Delivery Entrance</option>
+            <option value='94'>Loading Dock</option>
+            <option value='95'>Loading Zone</option>
+            <option value='96'>Rest Area</option>
+            <option value='97'>Complete Rest Area</option>
+            <option value='98'>Parking and Rest Room Only</option>
+            <option value='99'>Parking Only</option>
+            <option value='100'>Motorway Service Area</option>
+            <option value='101'>Scenic Overlook</option>
+            <option value='102'>Hotel or Motel</option>
+            <option value='103'>Hotel</option>
+            <option value='104'>Motel</option>
+            <option value='105'>Lodging</option>
+            <option value='106'>Hostel</option>
+            <option value='107'>Campground</option>
+            <option value='108'>Guest House</option>
+            <option value='109'>Bed and Breakfast</option>
+            <option value='110'>Holiday Park</option>
+            <option value='111'>Short-Time Motel</option>
+            <option value='112'>Trekking Hut</option>
+            <option value='113'>Off-Road Vehicle Area</option>
+            <option value='114'>Park-Recreation</option>
+            <option value='115'>Park-Recreation Area</option>
+            <option value='116'>Sports Field</option>
+            <option value='117'>Garden</option>
+            <option value='118'>Beach</option>
+            <option value='119'>Recreation Center</option>
+            <option value='120'>Ski Lift</option>
+            <option value='121'>Scenic Point</option>
+            <option value='122'>Surf Life Savings Clubs</option>
+            <option value='123'>Bicycle Trailhead</option>
+            <option value='124'>Hiking Trailhead</option>
+            <option value='125'>Off Road Trailhead</option>
+            <option value='126'>Trailhead</option>
+            <option value='127'>Amusement or Holiday Park</option>
+            <option value='128'>Amusement Park</option>
+            <option value='129'>Zoo</option>
+            <option value='130'>Wild Animal Park</option>
+            <option value='131'>Wildlife Refuge</option>
+            <option value='132'>Aquarium</option>
+            <option value='133'>Ski Resort</option>
+            <option value='134'>Animal Park</option>
+            <option value='135'>Water Park</option>
+            <option value='136'>Other Convenience Store</option>
+            <option value='137'>Convenience Store</option>
+            <option value='138'>Shopping Mall</option>
+            <option value='139'>Department Store</option>
+            <option value='140'>Food-Beverage Specialty Store</option>
+            <option value='141'>Grocery</option>
+            <option value='142'>Specialty Food Store</option>
+            <option value='143'>Wine and Liquor</option>
+            <option value='144'>Bakery and Baked Goods Store</option>
+            <option value='145'>Sweet Shop</option>
+            <option value='146'>Butcher</option>
+            <option value='147'>Dairy Goods</option>
+            <option value='148'>Drug-Pharmacy</option>
+            <option value='149'>Drug Store</option>
+            <option value='150'>Pharmacy</option>
+            <option value='151'>Consumer Electronics Store</option>
+            <option value='152'>Mobile Retailer</option>
+            <option value='153'>Mobile Service Center</option>
+            <option value='154'>Computer and Software</option>
+            <option value='155'>Entertainment Electronics</option>
+            <option value='156'>Electronics</option>
+            <option value='157'>Hardware, House and Garden</option>
+            <option value='158'>Home Improvement-Hardware Store</option>
+            <option value='159'>Home Specialty Store</option>
+            <option value='160'>Floor and Carpet</option>
+            <option value='161'>Furniture Store</option>
+            <option value='162'>Garden Center</option>
+            <option value='163'>Glass and Window</option>
+            <option value='164'>Lumber</option>
+            <option value='165'>Major Appliance</option>
+            <option value='166'>Power Equipment Dealer</option>
+            <option value='167'>Paint Store</option>
+            <option value='168'>Other Bookshop</option>
+            <option value='169'>Book Store</option>
+            <option value='170'>Clothing and Accessories</option>
+            <option value='171'>Men's Apparel</option>
+            <option value='172'>Women's Apparel</option>
+            <option value='173'>Children's Apparel</option>
+            <option value='174'>Shoes-Footwear</option>
+            <option value='175'>Specialty Clothing Store</option>
+            <option value='176'>Consumer Goods</option>
+            <option value='177'>Sporting Goods Store</option>
+            <option value='178'>Office Supply and Services Store</option>
+            <option value='179'>Specialty Store</option>
+            <option value='180'>Pet Supply</option>
+            <option value='181'>Warehouse-Wholesale Store</option>
+            <option value='182'>General Merchandise</option>
+            <option value='183'>Discount Store</option>
+            <option value='184'>Flowers and Jewelry</option>
+            <option value='185'>Variety Store</option>
+            <option value='186'>Gift, Antique and Art</option>
+            <option value='187'>Hair and Beauty</option>
+            <option value='188'>Record, CD and Video</option>
+            <option value='189'>Video and Game Rental</option>
+            <option value='190'>Bicycle and Bicycle Accessories Shop</option>
+            <option value='191'>Market</option>
+            <option value='192'>Motorcycle Accessories</option>
+            <option value='193'>Non-Store Retailers</option>
+            <option value='194'>Pawnshop</option>
+            <option value='195'>Used-Second Hand Merchandise Stores</option>
+            <option value='196'>Adult Shop</option>
+            <option value='197'>Arts and Crafts Supplies</option>
+            <option value='198'>Florist</option>
+            <option value='199'>Jeweler</option>
+            <option value='200'>Toy Store</option>
+            <option value='201'>Bank</option>
+            <option value='202'>ATM</option>
+            <option value='203'>Money Transferring Service</option>
+            <option value='204'>Check Cashing Service-Currency Exchange</option>
+            <option value='205'>Communication-Media</option>
+            <option value='206'>Telephone Service</option>
+            <option value='207'>Commerical Services</option>
+            <option value='208'>Advertising-Marketing, PR and Market Research</option>
+            <option value='209'>Catering and Other Food Services</option>
+            <option value='210'>Construction</option>
+            <option value='211'>Customer Care-Service Center</option>
+            <option value='212'>Engineering and Scientific Services</option>
+            <option value='213'>Farming</option>
+            <option value='214'>Food Production</option>
+            <option value='215'>Human Resources and Recruiting Services</option>
+            <option value='216'>Investigation Services</option>
+            <option value='217'>IT and Office Equipment Services</option>
+            <option value='218'>Landscaping Services</option>
+            <option value='219'>Locksmiths and Security Systems Services</option>
+            <option value='220'>Management and Consulting Services</option>
+            <option value='221'>Manufacturing</option>
+            <option value='222'>Mining</option>
+            <option value='223'>Modeling Agencies</option>
+            <option value='224'>Motorcycle Service and Maintenance</option>
+            <option value='225'>Organizations and Societies</option>
+            <option value='226'>Entertainment and Recreation</option>
+            <option value='227'>Finance and Insurance</option>
+            <option value='228'>Healthcare and Healthcare Support Services</option>
+            <option value='229'>Real Estate and Brokers</option>
+            <option value='230'>Rental and Leasing</option>
+            <option value='231'>Repair and Maintenance Services</option>
+            <option value='232'>Printing and Publishing</option>
+            <option value='233'>Specialty Trade Contractors</option>
+            <option value='234'>Towing Service</option>
+            <option value='235'>Translation and Interpretation Services</option>
+            <option value='236'>Apartment Rental-Flat Rental</option>
+            <option value='237'>B2B Sales and Services</option>
+            <option value='238'>B2B Restaurant Services</option>
+            <option value='239'>Aviation</option>
+            <option value='240'>Interior and Exterior Design</option>
+            <option value='241'>Property Management</option>
+            <option value='242'>Financial Investment Firm</option>
+            <option value='243'>Business Facility</option>
+            <option value='244'>Police Station</option>
+            <option value='245'>Police Services-Security</option>
+            <option value='246'>Fire Department</option>
+            <option value='247'>Ambulance Services</option>
+            <option value='248'>Consumer Services</option>
+            <option value='249'>Travel Agent-Ticketing</option>
+            <option value='250'>Dry Cleaning and Laundry</option>
+            <option value='251'>Attorney</option>
+            <option value='252'>Banquet Hall</option>
+            <option value='253'>Boating</option>
+            <option value='254'>Business Service</option>
+            <option value='255'>Funeral Director</option>
+            <option value='256'>Mover</option>
+            <option value='257'>Photography</option>
+            <option value='258'>Realtor</option>
+            <option value='259'>Repair Service</option>
+            <option value='260'>Social Service</option>
+            <option value='261'>Storage</option>
+            <option value='262'>Tailor and Alteration</option>
+            <option value='263'>Tax Service</option>
+            <option value='264'>Utilities</option>
+            <option value='265'>Waste and Sanitary</option>
+            <option value='266'>Bicycle Service and Maintenance</option>
+            <option value='267'>Bill Payment Service</option>
+            <option value='268'>Body Piercing and Tattoos</option>
+            <option value='269'>Wedding Services and Bridal Studio</option>
+            <option value='270'>Internet Cafe</option>
+            <option value='271'>Kindergarten and Childcare</option>
+            <option value='272'>Maid Services</option>
+            <option value='273'>Marriage and Match Making Services</option>
+            <option value='274'>Public Administration</option>
+            <option value='275'>Misc. Consumer Services</option>
+            <option value='276'>Self Service Kiosk</option>
+            <option value='277'>Wellness Center and Services</option>
+            <option value='278'>Pet Care</option>
+            <option value='279'>Legal Services</option>
+            <option value='280'>Tanning Salon</option>
+            <option value='281'>Recycling Center</option>
+            <option value='282'>Electrical</option>
+            <option value='283'>Plumbing</option>
+            <option value='284'>Post Office</option>
+            <option value='285'>Post Box</option>
+            <option value='286'>Tourist Information</option>
+            <option value='287'>Fueling Station</option>
+            <option value='288'>Petrol-Gasoline Station</option>
+            <option value='289'>EV Charging Station</option>
+            <option value='290'>Automobile Dealership-New Cars</option>
+            <option value='291'>Automobile Dealership-Used Cars</option>
+            <option value='292'>Motorcycle Dealership</option>
+            <option value='293'>Car Repair-Service</option>
+            <option value='294'>Car Wash-Detailing</option>
+            <option value='295'>Car Repair</option>
+            <option value='296'>Auto Parts</option>
+            <option value='297'>Emission Testing</option>
+            <option value='298'>Tire Repair</option>
+            <option value='299'>Truck Repair</option>
+            <option value='300'>Van Repair</option>
+            <option value='301'>Road Assistance</option>
+            <option value='302'>Automobile Club</option>
+            <option value='303'>Rental Car Agency</option>
+            <option value='304'>Truck-Semi Dealer-Services</option>
+            <option value='305'>Truck Dealership</option>
+            <option value='306'>Truck Parking</option>
+            <option value='307'>Truck Stop-Plaza</option>
+            <option value='308'>Truck Wash</option>
+            <option value='309'>Hospital or Health Care Facility</option>
+            <option value='310'>Dentist-Dental Office</option>
+            <option value='311'>Family-General Practice Physicians</option>
+            <option value='312'>Psychiatric Institute</option>
+            <option value='313'>Nursing Home</option>
+            <option value='314'>Medical Services-Clinics</option>
+            <option value='315'>Hospital</option>
+            <option value='316'>Optical</option>
+            <option value='317'>Veterinarian</option>
+            <option value='318'>Hospital Emergency Room</option>
+            <option value='319'>Therapist</option>
+            <option value='320'>Chiropractor</option>
+            <option value='321'>Blood Bank</option>
+            <option value='322'>Government or Community Facility</option>
+            <option value='323'>City Hall</option>
+            <option value='324'>Embassy</option>
+            <option value='325'>Military Base</option>
+            <option value='326'>County Council</option>
+            <option value='327'>Civic-Community Center</option>
+            <option value='328'>Court House</option>
+            <option value='329'>Government Office</option>
+            <option value='330'>Border Crossing</option>
+            <option value='331'>Agricultural Checkpoint</option>
+            <option value='332'>Military Checkpoint</option>
+            <option value='333'>Education Facility</option>
+            <option value='334'>Higher Education</option>
+            <option value='335'>School</option>
+            <option value='336'>Training and Development</option>
+            <option value='337'>Coaching Institute</option>
+            <option value='338'>Fine Arts</option>
+            <option value='339'>Language Studies</option>
+            <option value='340'>Other Library</option>
+            <option value='341'>Library</option>
+            <option value='342'>Fair and Convention Facility</option>
+            <option value='343'>Convention-Exhibition Center</option>
+            <option value='344'>Parking Facility</option>
+            <option value='345'>Parking Garage-Parking House</option>
+            <option value='346'>Parking Lot</option>
+            <option value='347'>Park and Ride</option>
+            <option value='348'>Cellphone Parking Lot</option>
+            <option value='349'>Sports Facility-Venue</option>
+            <option value='350'>Sports Complex-Stadium</option>
+            <option value='351'>Ice Skating Rink</option>
+            <option value='352'>Swimming Pool</option>
+            <option value='353'>Tennis Court</option>
+            <option value='354'>Bowling Center</option>
+            <option value='355'>Indoor Ski</option>
+            <option value='356'>Hockey</option>
+            <option value='357'>Racquetball Court</option>
+            <option value='358'>Shooting Range</option>
+            <option value='359'>Soccer Club</option>
+            <option value='360'>Squash Court</option>
+            <option value='361'>Fitness-Health Club</option>
+            <option value='362'>Indoor Sports</option>
+            <option value='363'>Golf Course</option>
+            <option value='364'>Golf Practice Range</option>
+            <option value='365'>Race Track</option>
+            <option value='366'>Sporting Instruction and Camps</option>
+            <option value='367'>Sports Activities</option>
+            <option value='368'>Basketball</option>
+            <option value='369'>Badminton</option>
+            <option value='370'>Rugby</option>
+            <option value='371'>Diving Center</option>
+            <option value='372'>Facilities</option>
+            <option value='373'>Cemetery</option>
+            <option value='374'>Crematorium</option>
+            <option value='375'>Public Restroom-Toilets</option>
+            <option value='376'>Clubhouse</option>
+            <option value='377'>Offices</option>
+            <option value='378'>Registration Office</option>
+            <option value='379'>Hamlet</option>
+            <option value='380'>Named Place</option>
+            <option value='381'>Neighborhood</option>
+            <option value='382'>Outdoor Area-Complex</option>
+            <option value='383'>Industrial Zone</option>
+            <option value='384'>Marina</option>
+            <option value='385'>RV Parks</option>
+            <option value='386'>Collective Community</option>
+            <option value='387'>Island</option>
+            <option value='388'>Residential Area-Building</option>
+            <option value='389'>Business Area</option>
+        </select>
+    </div>
 </body>
+<script src="./scripts/jquery.multi-select.js"></script>
 <script>
+    var poi_selected_values = [];
+    for (let index = 0; index < 98; index++) {
+        poi_selected_values.push(0);
+    }
+    var pois_str = ''
+    for (let index = poi_selected_values.length - 1; index >= 0; index -= 1) {
+        console.log(poi_selected_values[index], poi_selected_values[index] == 0);
+        if (poi_selected_values[index] == 0) {
+            poi_selected_values.pop();
+        } else {
+            break
+        }
+    }
+    console.log(poi_selected_values);
+    poi_selected_values.forEach(function (v, i) {
+        pois_str += v;
+    });
     //Taipei
     var default_lat = 25.03678;
     var default_lon = 121.56851;
     var tile_size = 256;
     var map = L.map('map', {
-        center: [default_lat, default_lon]
-        , zoom: 15
-        , maxZoom: 20
-        , minZoom: 4
-        , layers: []
-        , worldCopyJump: false
-        , crs: L.CRS.EPSG3857
-        , keyboard: true
+        center: [default_lat, default_lon],
+        zoom: 15,
+        maxZoom: 20,
+        minZoom: 4,
+        layers: [],
+        worldCopyJump: false,
+        crs: L.CRS.EPSG3857,
+        keyboard: true
     });
-    var he_appid = 'NXqTq9BXXeEiR4yuXfjj';
-    var he_appcode = '3NpseRCnS25FaujWRdthVQ';
+    var hash = new L.Hash(map);
+    var image_layer;
+    var he_apikey = 'kVpNlN_Zq68gCvCKaZGJA8No9l-9nQfWKls02XySZus';
 
     function getURL(URL) {
         return new Promise(function (resolve, reject) {
@@ -74,8 +499,7 @@
             req.onload = function () {
                 if (req.status === 200) {
                     resolve(req.responseText);
-                }
-                else {
+                } else {
                     reject(new Error(req.statusText));
                 }
             };
@@ -104,78 +528,84 @@
         var px_lat = Math.abs((tile_to_lat(y, z) - tile_to_lat(y + 1, z)) / tile_size);
         var px_lon = Math.abs((tile_to_lon(y, z) - tile_to_lon(y + 1, z)) / tile_size);
         getURL(meta_base_url).then(function onFulfilled(result) {
-            var r = JSON.parse(result)
-                , metadata = r.metadata
-                , city_center_labels = metadata['city center labels']
-                , labels = metadata['labels']
-                , street_labels = metadata['street labels'];
+            var r = JSON.parse(result),
+                metadata = r.metadata,
+                city_center_labels = metadata['city center labels'],
+                labels = metadata['labels'],
+                street_labels = metadata['street labels'];
             for (m = 0; m < labels.length; m++) {
-                var label = labels[m]
-                    , name = label['name']
-                    , type = label['type']
-                    , bounding_boxes = label['bounding boxes'];
+                var label = labels[m],
+                    name = label['name'],
+                    type = label['type'],
+                    bounding_boxes = label['bounding boxes'];
                 for (p = 0; p < bounding_boxes.length; p++) {
-                    var bbox = bounding_boxes[p]
-                        , left = Math.floor(bbox['left'])
-                        , top = Math.floor(bbox['top'])
-                        , width = Math.floor(bbox['width'])
-                        , height = Math.floor(bbox['height'])
-                        , left_lon = tile_to_lon(x, z) + left * px_lon
-                        , top_lat = tile_to_lat(y, z) - top * px_lat
-                        , center_lon = tile_to_lon(x, z) + (left + width / 2) * px_lon
-                        , center_lat = tile_to_lat(y, z) - (top + height / 2) * px_lat
-                        , right_lon = tile_to_lon(x, z) + (left + width) * px_lon
-                        , buttom_lat = tile_to_lat(y, z) - (top + height) * px_lat;
-                    var bounds = [[top_lat, left_lon], [buttom_lat, right_lon]];
+                    var bbox = bounding_boxes[p],
+                        left = Math.floor(bbox['left']),
+                        top = Math.floor(bbox['top']),
+                        width = Math.floor(bbox['width']),
+                        height = Math.floor(bbox['height']),
+                        left_lon = tile_to_lon(x, z) + left * px_lon,
+                        top_lat = tile_to_lat(y, z) - top * px_lat,
+                        center_lon = tile_to_lon(x, z) + (left + width / 2) * px_lon,
+                        center_lat = tile_to_lat(y, z) - (top + height / 2) * px_lat,
+                        right_lon = tile_to_lon(x, z) + (left + width) * px_lon,
+                        buttom_lat = tile_to_lat(y, z) - (top + height) * px_lat;
+                    var bounds = [
+                        [top_lat, left_lon],
+                        [buttom_lat, right_lon]
+                    ];
                     var meta_rec = L.rectangle(bounds, {
-                        color: "#ffbb55"
-                        , weight: 1
+                        color: "#ffbb55",
+                        weight: 1
                     });
                     meta_rec.bindPopup('label<br>name: ' + name + '<br>type: ' + type);
                     meta_markers.push(meta_rec);
                 }
             }
             for (n = 0; n < city_center_labels.length; n++) {
-                var city_center_label = city_center_labels[n]
-                    , name = city_center_label['name']
-                    , text_box = city_center_label['text box']
-                    , info = city_center_label['city center info'];
-                var left = Math.floor(text_box['left'])
-                    , top = Math.floor(text_box['top'])
-                    , width = Math.floor(text_box['width'])
-                    , height = Math.floor(text_box['height'])
-                    , left_lon = tile_to_lon(x, z) + left * px_lon
-                    , top_lat = tile_to_lat(y, z) - top * px_lat
-                    , center_lon = tile_to_lon(x, z) + (left + width / 2) * px_lon
-                    , center_lat = tile_to_lat(y, z) - (top + height / 2) * px_lat
-                    , right_lon = tile_to_lon(x, z) + (left + width) * px_lon
-                    , buttom_lat = tile_to_lat(y, z) - (top + height) * px_lat;
-                var bounds = [[top_lat, left_lon], [buttom_lat, right_lon]];
+                var city_center_label = city_center_labels[n],
+                    name = city_center_label['name'],
+                    text_box = city_center_label['text box'],
+                    info = city_center_label['city center info'];
+                var left = Math.floor(text_box['left']),
+                    top = Math.floor(text_box['top']),
+                    width = Math.floor(text_box['width']),
+                    height = Math.floor(text_box['height']),
+                    left_lon = tile_to_lon(x, z) + left * px_lon,
+                    top_lat = tile_to_lat(y, z) - top * px_lat,
+                    center_lon = tile_to_lon(x, z) + (left + width / 2) * px_lon,
+                    center_lat = tile_to_lat(y, z) - (top + height / 2) * px_lat,
+                    right_lon = tile_to_lon(x, z) + (left + width) * px_lon,
+                    buttom_lat = tile_to_lat(y, z) - (top + height) * px_lat;
+                var bounds = [
+                    [top_lat, left_lon],
+                    [buttom_lat, right_lon]
+                ];
                 var meta_rec = L.rectangle(bounds, {
-                    color: "#ffbb55"
-                    , weight: 1
+                    color: "#ffbb55",
+                    weight: 1
                 });
                 meta_rec.bindPopup('city center label<br>name: ' + name + '<br>info: ' + JSON.stringify(info));
                 meta_markers.push(meta_rec);
             }
             for (q = 0; q < street_labels.length; q++) {
-                var street_label = street_labels[q]
-                    , street_label_name = street_label['name']
-                    , street_label_font_size = street_label['font size']
-                    , street_label_vertices = street_label['vertices'];
+                var street_label = street_labels[q],
+                    street_label_name = street_label['name'],
+                    street_label_font_size = street_label['font size'],
+                    street_label_vertices = street_label['vertices'];
                 var polyline_latlngs = [];
                 for (r = 0; r < street_label_vertices.length; r++) {
-                    var vertice = street_label_vertices[r]
-                        , vertice_x = vertice['x']
-                        , vertice_y = vertice['y']
-                        , x_lon = tile_to_lon(x, z) + vertice_x * px_lon
-                        , y_lat = tile_to_lat(y, z) - vertice_y * px_lat;
+                    var vertice = street_label_vertices[r],
+                        vertice_x = vertice['x'],
+                        vertice_y = vertice['y'],
+                        x_lon = tile_to_lon(x, z) + vertice_x * px_lon,
+                        y_lat = tile_to_lat(y, z) - vertice_y * px_lat;
                     polyline_latlngs.push([y_lat, x_lon]);
                 }
                 var street_label_polyline = L.polyline(polyline_latlngs, {
-                    color: '#ffbb55'
-                    , weight: street_label_font_size
-                    , opacity: 0.3
+                    color: '#ffbb55',
+                    weight: street_label_font_size,
+                    opacity: 0.3
                 }).bindPopup('street label<br>name: ' + street_label_name);
                 meta_markers.push(street_label_polyline);
             }
@@ -186,19 +616,72 @@
         })
     }
 
+    function reload_tile_for_poi(select, item) {
+        pois_str = '';
+        for (let index = 0; index < 98; index++) {
+            poi_selected_values.push(0);
+        }
+        console.log(item);
+        if (item[0]) {
+            var row = parseInt(item / 4);
+            var column = item % 4; //0-3
+            var bitmask = 8 / Math.pow(2, column);
+            var value = parseInt(poi_selected_values[row], 16);
+            if (select) {
+                value += bitmask;
+            } else {
+                value -= bitmask;
+            }
+            poi_selected_values[row] = value.toString(16);
+            for (let index = poi_selected_values.length - 1; index >= 0; index -= 1) {
+                console.log(poi_selected_values[index], poi_selected_values[index] == 0);
+                if (poi_selected_values[index] == 0) {
+                    poi_selected_values.pop();
+                } else {
+                    break
+                }
+            }
+            poi_selected_values.forEach(function (v, i) {
+                pois_str += v;
+            });
+            meta_group.clearLayers();
+            if (image_layer) {
+                if (map.hasLayer(image_layer)) {
+                    map.removeLayer(image_layer);
+                    var lg = document.getElementById('lg').value;
+                    var tile_base_url = compose_url();
+                    image_layer.setUrl(tile_base_url);
+                    map.addLayer(image_layer);
+                }
+            }
+        }
+    }
+
+    $('#poi_select').multiSelect({
+        selectableHeader: "<div class='custom-header'>POI Categories</div>",
+        selectionHeader: "<div class='custom-header'>Selected</div>",
+        afterInit: function () {
+            $('#poi_select').multiSelect('deselect_all');
+        },
+        afterSelect: function (v) {
+            reload_tile_for_poi(true, v);
+        },
+        afterDeselect: function (v) {
+            reload_tile_for_poi(false, v);
+        }
+    });
+
     function onSearch(e) {
         var keyCode = null;
         if (e.which) {
             keyCode = e.which;
-        }
-        else if (e.keyCode) {
+        } else if (e.keyCode) {
             keyCode = e.keyCode;
         }
         if (keyCode == 13) {
             meta_group.clearLayers();
             map.removeLayer(image_layer);
             var lg = document.getElementById('lg').value;
-            var poi_mask_value = document.getElementById('poi_cat_mask').value;
             var tile_base_url = compose_url();
             image_layer.setUrl(tile_base_url);
             map.addLayer(image_layer);
@@ -208,7 +691,7 @@
     function compose_url() {
         var base_url = document.getElementById('base_url').value;
         if (!base_url) {
-            base_url = 'base.maps.api.here.com';
+            base_url = 'base.maps.ls.hereapi.com';
         }
         var tiletypes = document.getElementById('tiletypes').value;
         if (!tiletypes) {
@@ -226,16 +709,16 @@
         if (!ppi) {
             ppi = '72';
         }
-        var pois = document.getElementById('poi_cat_mask').value;
-        if (!pois) {
-            pois = '';
-        }
         var lg = document.getElementById('lg').value;
         if (!lg) {
             lg = 'eng';
         }
-        var tile_base_url = 'https://{s}.' + base_url + '/maptile/2.1/' + tiletypes + '/newest/' + scheme + '/{z}/{x}/{y}/256/png8?ppi=' + ppi + '&app_id=' + he_appid + '&app_code=' + he_appcode + '&style=' + style + '&pois=' + pois + '&lg=' + lg;
-        document.getElementById('full_url').innerHTML = '<mark>' + 'https://{s}.' + base_url + '/maptile/2.1/' + tiletypes + '/newest/' + scheme + '/{z}/{x}/{y}/256/png8?ppi=' + ppi + '&app_id={APP_ID}&app_code={APP_CODE}&style=' + style + '&lg=' + lg + '&pois=' + pois + '</mark>';
+        var tile_base_url = 'https://{s}.' + base_url + '/maptile/2.1/' + tiletypes + '/newest/' + scheme +
+            '/{z}/{x}/{y}/256/png8?ppi=' + ppi + '&apikey=' + he_apikey + '&style=' + style + '&lg=' + lg + '&pois=' +
+            pois_str;
+        document.getElementById('full_url').innerHTML = '<mark>' + 'https://{s}.' + base_url + '/maptile/2.1/' +
+            tiletypes + '/newest/' + scheme + '/{z}/{x}/{y}/256/png8?ppi=' + ppi +
+            '&apikey={APIKEY}&style=' + style + '&lg=' + lg + '&pois=' + pois_str + '</mark>';
         return tile_base_url
     }
     document.getElementById('base_url').addEventListener('keypress', onSearch);
@@ -244,26 +727,25 @@
     document.getElementById('style').addEventListener('keypress', onSearch);
     document.getElementById('ppi').addEventListener('keypress', onSearch);
     document.getElementById('lg').addEventListener('keypress', onSearch);
-    document.getElementById('poi_cat_mask').addEventListener('keypress', onSearch);
     var tile_base_url = compose_url();
-    var image_layer = L.tileLayer(tile_base_url, {
-        "attribution": "HERE"
-        , "detectRetina": true
-        , "maxZoom": 20
-        , "minZoom": 1
-        , "noWrap": false
-        , "subdomains": ['1', '2', '3', '4']
+    image_layer = L.tileLayer(tile_base_url, {
+        "attribution": "HERE",
+        "detectRetina": true,
+        "maxZoom": 20,
+        "minZoom": 1,
+        "noWrap": false,
+        "subdomains": ['1', '2', '3', '4']
     }).addTo(map);
     map.on('zoomstart', function (e) {
         meta_group.clearLayers();
     })
     image_layer.on('tileload', function (e) {
-        var coords = e.coords
-            , x = coords.x
-            , y = coords.y
-            , z = coords.z
-            , url = e
-            , meta_url = e.tile.src + '&metadata=metaonly';
+        var coords = e.coords,
+            x = coords.x,
+            y = coords.y,
+            z = coords.z,
+            url = e,
+            meta_url = e.tile.src + '&metadata=metaonly';
         call_meta(meta_url, x, y, z);
     })
     map.addLayer(image_layer);
@@ -271,8 +753,7 @@
     function toggle_meta_label() {
         if (!map.hasLayer(meta_group)) {
             map.addLayer(meta_group);
-        }
-        else {
+        } else {
             map.removeLayer(meta_group);
         }
     }
